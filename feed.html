@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block title %}EntreNet{% endblock %}
+
+{% block content %}
+<div class="feed-container">
+    <div class="feed-left">
+        <div class="profile-card">
+            <div class="profile-background"></div>
+            <div class="profile-info">
+                <a href="{{ url_for('profile', user_id=user.id) }}">
+                    <img src="{{ url_for('static', filename='uploads/' + user.profile_picture) }}" alt="Profile" class="profile-img">
+                    <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+                </a>
+                <p class="headline">{{ user.headline }}</p>
+            </div>
+            <div class="profile-stats">
+                <div class="stat">
+                    <span class="stat-label">Who's viewed your profile</span>
+                    <span class="stat-value">38</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Connections</span>
+                    <span class="stat-value">{{ connections|length }}</span>
+                </div>
+            </div>
+            <div class="premium-banner">
+                <span>Access exclusive tools & insights</span>
+                <a href="#">Try Premium for free</a>
+            </div>
+            <div class="items-icon">
+                <i class="fas fa-bookmark"></i>
+                <span>My items</span>
+            </div>
+        </div>
+        
+        <div class="recent-card">
+            <div class="recent-header">
+                <h3>Recent</h3>
+            </div>
+            <ul class="recent-list">
+                <li><a href="#"><i class="fas fa-users"></i> Web Development Group</a></li>
+                <li><a href="#"><i class="fas fa-hashtag"></i> javascript</a></li>
+                <li><a href="#"><i class="fas fa-hashtag"></i> webdevelopment</a></li>
+            </ul>
+            <div class="groups-header">
+                <h3>Groups</h3>
+            </div>
+            <ul class="groups-list">
+                <li><a href="#"><i class="fas fa-users"></i> Web Development</a></li>
+                <li><a href="#"><i class="fas fa-users"></i> JavaScript Developers</a></li>
+            </ul>
+            <a href="#" class="discover-more">Discover more</a>
+        </div>
+    </div>
+    
+    <div class="feed-middle">
+        <div class="post-form-card">
+            <div class="post-form-header">
+                <img src="{{ url_for('static', filename='uploads/' + user.profile_picture) }}" alt="Profile" class="profile-img-small">
+                <form action="{{ url_for('create_post') }}" method="POST" enctype="multipart/form-data" class="post-form">
+                    <input type="text" name="content" placeholder="Start a post" class="post-input">
+                    <div class="post-form-actions">
+                        <div class="post-form-action">
+                            <label for="post-image" class="post-action-btn">
+                                <i class="fas fa-image"></i>
+                                <span>Photo</span>
+                            </label>
+                            <input type="file" id="post-image" name="image" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="post-form-action">
+                            <button type="button" class="post-action-btn">
+                                <i class="fas fa-video"></i>
+                                <span>Video</span>
+                            </button>
+                        </div>
+                        <div class="post-form-action">
+                            <button type="button" class="post-action-btn">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Event</span>
+                            </button>
+                        </div>
+                        <div class="post-form-action">
+                            <button type="button" class="post-action-btn">
+                                <i class="fas fa-newspaper"></i>
+                                <span>Write article</span>
+                            </button>
+                        </div>
+                        <button type="submit" class="btn btn-primary post-submit-btn">Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="feed-divider">
+            <hr>
+            <span>Sort by: <strong>Recent</strong> <i class="fas fa-caret-down"></i></span>
+        </div>
+        
+        {% if connection_requests %}
+        <div class="connection-requests-card">
+            <h3>Connection Requests ({{ connection_requests|length }})</h3>
+            <div class="connection-requests-list">
+                {% for requester in connection_requests %}
+                <div class="connection-request">
+                    <img src="{{ url_for('static', filename='uploads/' + requester.profile_picture) }}" alt="{{ requester.first_name }}" class="profile-img-small">
+                    <div class="connection-request-info">
+                        <h4>{{ requester.first_name }} {{ requester.last_name }}</h4>
+                        <p>{{ requester.headline }}</p>
+                        <div class="connection-request-actions">
+                            <form action="{{ url_for('accept_connection', user_id=requester.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-primary btn-sm">Accept</button>
+                            </form>
+                            <form action="{{ url_for('reject_connection', user_id=requester.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-outline btn-sm">Ignore</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% for post in posts %}
+        <div class="post-card" data-post-id="{{ post.id }}">
+            <div class="post-header">
+                <img src="{{ url_for('static', filename='uploads/' + post.author.profile_picture) }}" alt="Profile" class="profile-img-small">
+                <div class="post-info">
+                    <h3><a href="{{ url_for('profile', user_id=post.author.id) }}">{{ post.author.first_name }} {{ post.author.last_name }}</a></h3>
+                    <p class="post-subtitle">{{ post.author.headline }}</p>
+                    <p class="post-time">{{ post.created_at.strftime('%B %d, %Y') }}</p>
+                </div>
+                <button class="post-more-btn">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+            </div>
+            <div class="post-content">
+                <p>{{ post.content }}</p>
+                {% if post.image %}
+                <div class="post-image">
+                    <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="Post image">
+                </div>
+                {% endif %}
+            </div>
+            <div class="post-stats">
+                <span class="likes-count">{{ post.likes|length }} likes</span>
+                <span class="comments-count">{{ post.comments|length }} comments</span>
+            </div>
+            <div class="post-actions">
+                <button class="post-action-btn like-btn" data-post-id="{{ post.id }}">
+                    <i class="far fa-thumbs-up"></i>
+                    <span>Like</span>
+                </button>
+                <button class="post-action-btn comment-btn">
+                    <i class="far fa-comment"></i>
+                    <span>Comment</span>
+                </button>
+                <button class="post-action-btn">
+                    <i class="fas fa-share"></i>
+                    <span>Share</span>
+                </button>
+                <button class="post-action-btn">
+                    <i class="far fa-paper-plane"></i>
+                    <span>Send</span>
+                </button>
+            </div>
+            <div class="post-comments">
+                <div class="comment-form">
+                    <img src="{{ url_for('static', filename='uploads/' + user.profile_picture) }}" alt="Profile" class="profile-img-small">
+                    <form class="comment-input-form" data-post-id="{{ post.id }}">
+                        <input type="text" name="content" placeholder="Add a comment..." class="comment-input">
+                        <button type="submit" class="comment-submit-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="comments-list" id="comments-list-{{ post.id }}">
+                    {% for comment in post.comments %}
+                    <div class="comment">
+                        <img src="{{ url_for('static', filename='uploads/' + comment.user.profile_picture) }}" alt="Profile" class="profile-img-small">
+                        <div class="comment-content">
+                            <h4>{{ comment.user.first_name }} {{ comment.user.last_name }}</h4>
+                            <p>{{ comment.content }}</p>
+                            <div class="comment-actions">
+                                <span class="comment-time">{{ comment.created_at.strftime('%B %d, %Y') }}</span>
+                                <button class="comment-like-btn">Like</button>
+                                <button class="comment-reply-btn">Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="feed-right">
+        <div class="news-card">
+            <div class="news-header">
+                <h2>LinkedIn News</h2>
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <ul class="news-list">
+                <li class="news-item">
+                    <div class="news-bullet"></div>
+                    <div class="news-content">
+                        <h3>Tech layoffs continue to rise</h3>
+                        <p>1d ago • 5,243 readers</p>
+                    </div>
+                </li>
+                <li class="news-item">
+                    <div class="news-bullet"></div>
+                    <div class="news-content">
+                        <h3>Remote work here to stay</h3>
+                        <p>2d ago • 3,112 readers</p>
+                    </div>
+                </li>
+                <li class="news-item">
+                    <div class="news-bullet"></div>
+                    <div class="news-content">
+                        <h3>AI transforms job market</h3>
+                        <p>3d ago • 8,976 readers</p>
+                    </div>
+                </li>
+                <li class="news-item">
+                    <div class="news-bullet"></div>
+                    <div class="news-content">
+                        <h3>Startups raise record funding</h3>
+                        <p>4d ago • 1,432 readers</p>
+                    </div>
+                </li>
+                <li class="news-item">
+                    <div class="news-bullet"></div>
+                    <div class="news-content">
+                        <h3>New skills in high demand</h3>
+                        <p>5d ago • 2,654 readers</p>
+                    </div>
+                </li>
+            </ul>
+            <button class="show-more-btn">Show more <i class="fas fa-chevron-down"></i></button>
+        </div>
+        
+        <div class="ad-card">
+            <div class="ad-header">
+                <span>Ad</span>
+                <i class="fas fa-ellipsis-h"></i>
+            </div>
+            <div class="ad-content">
+                <p>Follow your passion in your professional life</p>
+                <div class="ad-images">
+                    <img src="{{ url_for('static', filename='img/ad-image.jpg') }}" alt="Advertisement" class="ad-main-img">
+                    <img src="{{ url_for('static', filename='img/company-logo.png') }}" alt="Company" class="ad-company-img">
+                </div>
+                <h3>Find your dream job</h3>
+                <button class="btn btn-outline btn-sm">Learn more</button>
+            </div>
+        </div>
+        
+        <div class="footer-card">
+            <div class="footer-links">
+                <a href="#">About</a>
+                <a href="#">Accessibility</a>
+                <a href="#">Help Center</a>
+                <a href="#">Privacy & Terms</a>
+                <a href="#">Ad Choices</a>
+                <a href="#">Advertising</a>
+                <a href="#">Business Services</a>
+                <a href="#">Get the LinkedIn app</a>
+                <a href="#">More</a>
+            </div>
+            <div class="footer-copyright">
+                <img src="#" alt="EntreNet" class="logo-small">
+                <span>LinkedIn Corporation © {{ year }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Like post functionality
+    const likeBtns = document.querySelectorAll('.like-btn');
+    likeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const postId = this.getAttribute('data-post-id');
+            
+            fetch(`/like-post/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+                    const likesCount = postCard.querySelector('.likes-count');
+                    likesCount.textContent = `${data.likeCount} likes`;
+                    
+                    if (data.action === 'liked') {
+                        this.querySelector('i').classList.remove('far');
+                        this.querySelector('i').classList.add('fas');
+                        this.classList.add('liked');
+                    } else {
+                        this.querySelector('i').classList.remove('fas');
+                        this.querySelector('i').classList.add('far');
+                        this.classList.remove('liked');
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+    
+    // Comment functionality
+    const commentForms = document.querySelectorAll('.comment-input-form');
+    commentForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const postId = this.getAttribute('data-post-id');
+            const content = this.querySelector('input[name="content"]').value;
+            
+            if (!content.trim()) return;
+            
+            fetch(`/comment-post/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `content=${encodeURIComponent(content)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const commentsList = document.getElementById(`comments-list-${postId}`);
+                    const newComment = document.createElement('div');
+                    newComment.className = 'comment';
+                    newComment.innerHTML = `
+                        <img src="${data.comment.user_profile_picture}" alt="Profile" class="profile-img-small">
+                        <div class="comment-content">
+                            <h4>${data.comment.user_name}</h4>
+                            <p>${data.comment.content}</p>
+                            <div class="comment-actions">
+                                <span class="comment-time">${data.comment.created_at}</span>
+                                <button class="comment-like-btn">Like</button>
+                                <button class="comment-reply-btn">Reply</button>
+                            </div>
+                        </div>
+                    `;
+                    commentsList.appendChild(newComment);
+                    
+                    // Update comment count
+                    const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+                    const commentsCount = postCard.querySelector('.comments-count');
+                    const currentCount = parseInt(commentsCount.textContent);
+                    commentsCount.textContent = `${currentCount + 1} comments`;
+                    
+                    // Clear input
+                    this.querySelector('input[name="content"]').value = '';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+    
+    // Toggle comments visibility
+    const commentBtns = document.querySelectorAll('.comment-btn');
+    commentBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const postCard = this.closest('.post-card');
+            const commentsSection = postCard.querySelector('.post-comments');
+            
+            if (commentsSection.style.display === 'block') {
+                commentsSection.style.display = 'none';
+            } else {
+                commentsSection.style.display = 'block';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

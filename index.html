@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}EntreNet: Log In or Sign Up{% endblock %}
+
+{% block content %}
+<div class="landing-page">
+    <div class="landing-header">
+        <div class="logo-container">
+            <img src="#" alt="EntreNet" class="logo">
+        </div>
+        <div class="auth-buttons">
+            <a href="{{ url_for('login') }}" class="btn btn-outline">Sign in</a>
+            <a href="{{ url_for('signup') }}" class="btn btn-primary">Join now</a>
+        </div>
+    </div>
+
+    <div class="landing-content">
+        <div class="landing-main">
+            <div class="landing-text">
+                <h1>Welcome to your professional community</h1>
+                <div class="landing-cta">
+                    <a href="{{ url_for('signup') }}" class="btn btn-primary btn-large">Get started</a>
+                </div>
+            </div>
+            <div class="landing-image">
+                <img src="{{ url_for('static', filename='img/landing-image.png') }}" alt="Professional community">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %} EntreNet Jobs{% endblock %}
+
+{% block content %}
+<div class="jobs-container">
+    <div class="jobs-sidebar">
+        <div class="jobs-sidebar-header">
+            <h2>Your Job Dashboard</h2>
+        </div>
+        <div class="jobs-sidebar-content">
+            <ul class="jobs-sidebar-menu">
+                <li class="active"><a href="#"><i class="fas fa-bookmark"></i> My Jobs</a></li>
+                <li><a href="#"><i class="fas fa-bell"></i> Job Alerts</a></li>
+                <li><a href="#"><i class="fas fa-check-square"></i> Skill Assessments</a></li>
+                <li><a href="#"><i class="fas fa-file-alt"></i> Resume Builder</a></li>
+                <li><a href="#"><i class="fas fa-chart-line"></i> Job Seeker Settings</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="jobs-main">
+        <div class="jobs-search-bar">
+            <form action="{{ url_for('jobs') }}" method="GET" class="jobs-search-form">
+                <div class="search-input-group">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="title" placeholder="Search job titles" value="{{ request.args.get('title', '') }}">
+                </div>
+                <div class="search-input-group">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <input type="text" name="location" placeholder="Location" value="{{ request.args.get('location', '') }}">
+                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+        
+        <div class="jobs-recommended">
+            <h2>Recommended for you</h2>
+            <p class="jobs-subtitle">Based on your profile and search history</p>
+            
+            <div class="jobs-list">
+                {% for job in jobs %}
+                <div class="job-card">
+                    <div class="job-card-header">
+                        <img src="{{ url_for('static', filename='img/company-logo.png') }}" alt="{{ job.company }}" class="company-logo">
+                        <div class="job-info">
+                            <h3><a href="#">{{ job.title }}</a></h3>
+                            <p class="company-name">{{ job.company }}</p>
+                            <p class="job-location">{{ job.location }}</p>
+                            <div class="job-posted">
+                                <i class="far fa-clock"></i> Posted {{ job.posted_date }}
+                            </div>
+                        </div>
+                        <button class="job-save-btn">
+                            <i class="far fa-bookmark"></i>
+                        </button>
+                    </div>
+                    <div class="job-card-body">
+                        <p class="job-description">{{ job.description }}</p>
+                    </div>
+                    <div class="job-card-footer">
+                        <button class="btn btn-primary">Apply Now</button>
+                        <button class="btn btn-outline">Easy Apply</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="jobs-sidebar-right">
+        <div class="jobs-sidebar-card">
+            <h3>Job Search Tips</h3>
+            <ul class="jobs-tips-list">
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Update your resume</span>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Complete your profile</span>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Set job alerts</span>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Research companies</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="jobs-sidebar-card">
+            <h3>Premium Career Features</h3>
+            <p>Unlock premium features to boost your job search</p>
+            <button class="btn btn-outline btn-full">Try Premium for Free</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.jobs-container {
+    display: grid;
+    grid-template-columns: 225px 1fr 300px;
+    gap: 24px;
+    max-width: 1128px;
+    margin: 24px auto;
+    padding: 0 16px;
+}
+
+.jobs-sidebar, .jobs-sidebar-right {
+    background-color: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.jobs-sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.jobs-sidebar-header h2 {
+    font-size: 16px;
+}
+
+.jobs-sidebar-menu {
+    padding: 8px 0;
+}
+
+.jobs-sidebar-menu li {
+    padding: 8px 16px;
+}
+
+.jobs-sidebar-menu li.active {
+    background-color: var(--primary-light);
+}
+
+.jobs-sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-color);
+}
+
+.jobs-sidebar-menu li.active a {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.jobs-main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.jobs-search-bar {
+    background-color: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    padding: 16px;
+}
+
+.jobs-search-form {
+    display: flex;
+    gap: 8px;
+}
+
+.search-input-group {
+    flex: 1;
+    position: relative;
+}
+
+.search-input-group i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+.search-input-group input {
+    width: 100%;
+    padding: 12px 12px 12px 36px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.jobs-recommended {
+    background-color: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    padding: 16px;
+}
+
+.jobs-recommended h2 {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.jobs-subtitle {
+    color: var(--text-light);
+    margin-bottom: 16px;
+}
+
+.jobs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.job-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.job-card-header {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.company-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.job-info {
+    flex: 1;
+}
+
+.job-info h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.company-name {
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.job-location {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 4px;
+}
+
+.job-posted {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.job-save-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.job-card-body {
+    margin-bottom: 16px;
+}
+
+.job-description {
+    font-size: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.job-card-footer {
+    display: flex;
+    gap: 8px;
+}
+
+.jobs-sidebar-card {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.jobs-sidebar-card h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.jobs-sidebar-card p {
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.jobs-tips-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.jobs-tips-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.jobs-tips-list i {
+    color: var(--secondary-color);
+}
+
+@media (max-width: 1024px) {
+    .jobs-container {
+        grid-template-columns: 225px 1fr;
+    }
+    
+    .jobs-sidebar-right {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .jobs-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .jobs-sidebar {
+        display: none;
+    }
+    
+    .jobs-search-form {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
