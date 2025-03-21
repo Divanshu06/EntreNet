@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EntreNet{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    {% if session.user_id %}
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-left">
+                <a href="{{ url_for('feed') }}" class="navbar-brand">
+                    <img src="#" alt="EntreNet" class="logo">
+                </a>
+                <div class="search-container">
+                    <form action="{{ url_for('search') }}" method="GET">
+                        <input type="text" name="q" placeholder="Search" class="search-input">
+                        <button type="submit" class="search-button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="navbar-right">
+                <a href="{{ url_for('feed') }}" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="{{ url_for('profile', user_id=session.user_id) }}" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>My Network</span>
+                </a>
+                <a href="{{ url_for('jobs') }}" class="nav-item">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Jobs</span>
+                </a>
+                <a href="{{ url_for('messages') }}" class="nav-item">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>Messaging</span>
+                </a>
+                <a href="{{ url_for('notifications') }}" class="nav-item">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </a>
+                <div class="profile-dropdown">
+                    <button class="profile-dropdown-btn">
+                        {% if current_user %}
+                        <img src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) }}" alt="Profile" class="profile-img-small">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='img/default-profile.jpg') }}" alt="Profile" class="profile-img-small">
+                        {% endif %}
+                        <span>Me <i class="fas fa-caret-down"></i></span>
+                    </button>
+                    <div class="profile-dropdown-content">
+                        <a href="{{ url_for('profile', user_id=session.user_id) }}">View Profile</a>
+                        <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+                        <a href="{{ url_for('logout') }}">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

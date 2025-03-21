@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.first_name }} {{ user.last_name }} | EntreNet{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-main">
+        <div class="profile-header-card">
+            <div class="profile-background">
+                {% if user.background_image %}
+                <img src="{{ url_for('static', filename='uploads/' + user.background_image) }}" alt="Background">
+                {% endif %}
+            </div>
+            <div class="profile-header-content">
+                <div class="profile-picture">
+                    <img src="{{ url_for('static', filename='uploads/' + user.profile_picture) }}" alt="{{ user.first_name }} {{ user.last_name }}">
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name-section">
+                        <h1>{{ user.first_name }} {{ user.last_name }}</h1>
+                        {% if user.id == current_user_id %}
+                        <a href="{{ url_for('edit_profile') }}" class="edit-profile-btn">
+                            <i class="fas fa-pencil-alt"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <p class="headline">{{ user.headline }}</p>
+                    <p class="location">{{ user.location }}</p>
+                    <p class="connections">{{ connections|length }} connections</p>
+                    
+                    <div class="profile-actions">
+                        {% if user.id != current_user_id %}
+                            {% if connection_status == 'connected' %}
+                                <button class="btn btn-primary">Message</button>
+                                <button class="btn btn-outline">More</button>
+                            {% elif connection_status == 'pending_sent' %}
+                                <button class="btn btn-outline" disabled>Pending</button>
+                                <button class="btn btn-outline">More</button>
+                            {% elif connection_status == 'pending_received' %}
+                                <form action="{{ url_for('accept_connection', user_id=user.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-primary">Accept</button>
+                                </form>
+                                <form action="{{ url_for('reject_connection', user_id=user.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-outline">Ignore</button>
+                                </form>
+                            {% else %}
+                                <form action="{{ url_for('connect', user_id=user.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-primary">Connect</button>
+                                </form>
+                                <button class="btn btn-outline">More</button>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('edit_profile') }}" class="btn btn-outline">Edit profile</a>
+                            <button class="btn btn-outline">More</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if user.about %}
+        <div class="profile-section-card">
+            <div class="profile-section-header">
+                <h2>About</h2>
+                {% if user.id == current_user_id %}
+                <a href="{{ url_for('edit_profile') }}" class="edit-section-btn">
+                    <i class="fas fa-pencil-alt"></i>
+                </a>
+                {% endif %}
+            </div>
+            <div class="profile-section-content">
+                <p>{{ user.about }}</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="profile-section-card">
+            <div class="profile-section-header">
+                <h2>Experience</h2>
+                {% if user.id == current_user_id %}
+                <a href="{{ url_for('add_experience') }}" class="add-section-btn">
+                    <i class="fas fa-plus"></i>
+                </a>
+                {% endif %}
+            </div>
+            <div class="profile-section-content">
+                {% if experiences %}
+                    {% for exp in experiences %}
+                    <div class="experience-item">
+                        <div class="experience-logo">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="experience-details">
+                            <h3>{{ exp.title }}</h3>
+                            <p class="company">{{ exp.company }}</p>
+                            <p class="date">
+                                {% if exp.is_current %}
+                                    {{ exp.start_date.strftime('%b %Y') }} - Present
+                                {% else %}
+                                    {{ exp.start_date.strftime('%b %Y') }} - {{ exp.end_date.strftime('%b %Y') if exp.end_date else '' }}
+                                {% endif %}
+                                {% if exp.location %} · {{ exp.location }}{% endif %}
+                            </p>
+                            {% if exp.description %}
+                            <p class="description">{{ exp.description }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="no-content">No experience added yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="profile-section-card">
+            <div class="profile-section-header">
+                <h2>Education</h2>
+                {% if user.id == current_user_id %}
+                <a href="{{ url_for('add_education') }}" class="add-section-btn">
+                    <i class="fas fa-plus"></i>
+                </a>
+                {% endif %}
+            </div>
+            <div class="profile-section-content">
+                {% if educations %}
+                    {% for edu in educations %}
+                    <div class="education-item">
+                        <div class="education-logo">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <div class="education-details">
+                            <h3>{{ edu.school }}</h3>
+                            <p class="degree">{{ edu.degree }}{% if edu.field_of_study %}, {{ edu.field_of_study }}{% endif %}</p>
+                            <p class="date">
+                                {% if edu.is_current %}
+                                    {{ edu.start_date.strftime('%Y') }} - Present
+                                {% else %}
+                                    {{ edu.start_date.strftime('%Y') }} - {{ edu.end_date.strftime('%Y') if edu.end_date else '' }}
+                                {% endif %}
+                            </p>
+                            {% if edu.description %}
+                            <p class="description">{{ edu.description }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="no-content">No education added yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="profile-section-card">
+            <div class="profile-section-header">
+                <h2>Skills</h2>
+                {% if user.id == current_user_id %}
+                <a href="{{ url_for('add_skill') }}" class="add-section-btn">
+                    <i class="fas fa-plus"></i>
+                </a>
+                {% endif %}
+            </div>
+            <div class="profile-section-content">
+                {% if skills %}
+                    <div class="skills-list">
+                        {% for skill in skills %}
+                        <div class="skill-item">
+                            <h3>{{ skill.name }}</h3>
+                            <p class="endorsements">{{ skill.endorsements }} endorsements</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                <p class="no-content">No skills added yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="profile-section-card">
+            <div class="profile-section-header">
+                <h2>Posts</h2>
+            </div>
+            <div class="profile-section-content">
+                {% if posts %}
+                    {% for post in posts %}
+                    <div class="post-card" data-post-id="{{ post.id }}">
+                        <div class="post-header">
+                            <img src="{{ url_for('static', filename='uploads/' + post.author.profile_picture) }}" alt="Profile" class="profile-img-small">
+                            <div class="post-info">
+                                <h3>{{ post.author.first_name }} {{ post.author.last_name }}</h3>
+                                <p class="post-subtitle">{{ post.author.headline }}</p>
+                                <p class="post-time">{{ post.created_at.strftime('%B %d, %Y') }}</p>
+                            </div>
+                            <button class="post-more-btn">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        </div>
+                        <div class="post-content">
+                            <p>{{ post.content }}</p>
+                            {% if post.image %}
+                            <div class="post-image">
+                                <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="Post image">
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="post-stats">
+                            <span class="likes-count">{{ post.likes|length }} likes</span>
+                            <span class="comments-count">{{ post.comments|length }} comments</span>
+                        </div>
+                        <div class="post-actions">
+                            <button class="post-action-btn like-btn" data-post-id="{{ post.id }}">
+                                <i class="far fa-thumbs-up"></i>
+                                <span>Like</span>
+                            </button>
+                            <button class="post-action-btn comment-btn">
+                                <i class="far fa-comment"></i>
+                                <span>Comment</span>
+                            </button>
+                            <button class="post-action-btn">
+                                <i class="fas fa-share"></i>
+                                <span>Share</span>
+                            </button>
+                            <button class="post-action-btn">
+                                <i class="far fa-paper-plane"></i>
+                                <span>Send</span>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="no-content">No posts yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="profile-sidebar">
+        <div class="sidebar-card">
+            <h3>People also viewed</h3>
+            <ul class="profile-suggestions">
+                <li class="profile-suggestion">
+                    <img src="{{ url_for('static', filename='img/default-profile.jpg') }}" alt="Profile" class="profile-img-small">
+                    <div class="suggestion-info">
+                        <h4>Jane Smith</h4>
+                        <p>Software Engineer at Tech Co</p>
+                        <button class="btn btn-outline btn-sm">Connect</button>
+                    </div>
+                </li>
+                <li class="profile-suggestion">
+                    <img src="{{ url_for('static', filename='img/default-profile.jpg') }}" alt="Profile" class="profile-img-small">
+                    <div class="suggestion-info">
+                        <h4>John Doe</h4>
+                        <p>Product Manager at Startup Inc</p>
+                        <button class="btn btn-outline btn-sm">Connect</button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-card">
+            <h3>People you may know</h3>
+            <ul class="profile-suggestions">
+                <li class="profile-suggestion">
+                    <img src="{{ url_for('static', filename='img/default-profile.jpg') }}" alt="Profile" class="profile-img-small">
+                    <div class="suggestion-info">
+                        <h4>Alice Johnson</h4>
+                        <p>Data Scientist at Analytics Co</p>
+                        <button class="btn btn-outline btn-sm">Connect</button>
+                    </div>
+                </li>
+                <li class="profile-suggestion">
+                    <img src="{{ url_for('static', filename='img/default-profile.jpg') }}" alt="Profile" class="profile-img-small">
+                    <div class="suggestion-info">
+                        <h4>Bob Williams</h4>
+                        <p>UX Designer at Design Studio</p>
+                        <button class="btn btn-outline btn-sm">Connect</button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Like post functionality
+    const likeBtns = document.querySelectorAll('.like-btn');
+    likeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const postId = this.getAttribute('data-post-id');
+            
+            fetch(`/like-post/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+                    const likesCount = postCard.querySelector('.likes-count');
+                    likesCount.textContent = `${data.likeCount} likes`;
+                    
+                    if (data.action === 'liked') {
+                        this.querySelector('i').classList.remove('far');
+                        this.querySelector('i').classList.add('fas');
+                        this.classList.add('liked');
+                    } else {
+                        this.querySelector('i').classList.remove('fas');
+                        this.querySelector('i').classList.add('far');
+                        this.classList.remove('liked');
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
+{% endblock %}

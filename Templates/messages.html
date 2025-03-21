@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}EntreNet Messages{% endblock %}
+
+{% block content %}
+<div class="messages-container">
+    <div class="messages-sidebar">
+        <div class="messages-header">
+            <h2>Messaging</h2>
+            <button>
+                <i class="fas fa-ellipsis-h"></i>
+            </button>
+        </div>
+        <div class="messages-search">
+            <input type="text" placeholder="Search messages">
+        </div>
+        <div class="messages-list">
+            {% for connection in connections %}
+            <div class="message-contact {% if selected_user and selected_user.id == connection.id %}active{% endif %}" data-user-id="{{ connection.id }}">
+                <img src="{{ url_for('static', filename='uploads/' + connection.profile_picture) }}" alt="{{ connection.first_name }}" class="profile-img-small">
+                <div class="message-contact-info">
+                    <h3>{{ connection.first_name }} {{ connection.last_name }}</h3>
+                    <div class="message-preview">Click to start a conversation</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="chat-container">
+        {% if selected_user %}
+        <div class="chat-header">
+            <img src="{{ url_for('static', filename='uploads/' + selected_user.profile_picture) }}" alt="{{ selected_user.first_name }}" class="profile-img-small">
+            <h2>{{ selected_user.first_name }} {{ selected_user.last_name }}</h2>
+        </div>
+        <div class="chat-messages">
+            {% for message in messages %}
+            <div class="chat-message {% if message.sender_id == session.user_id %}sent{% else %}received{% endif %}">
+                {% if message.sender_id != session.user_id %}
+                <div class="message-sender">{{ selected_user.first_name }} {{ selected_user.last_name }}</div>
+                {% endif %}
+                <div class="message-content">{{ message.content }}</div>
+                <div class="message-timestamp">{{ message.created_at.strftime('%I:%M %p') }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="chat-input">
+            <form id="message-form" data-receiver-id="{{ selected_user.id }}">
+                <input type="text" name="content" placeholder="Write a message...">
+                <button type="submit">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div class="chat-placeholder">
+            <div style="text-align: center; padding: 40px;">
+                <i class="fas fa-comments" style="font-size: 48px; color: var(--text-light); margin-bottom: 16px;"></i>
+                <h2>Your Messages</h2>
+                <p>Select a conversation or start a new one</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Message form submission
+    const messageForm = document.getElementById('message-form');
+    if (messageForm) {
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const receiverId = this.getAttribute('data-receiver-id');
+            const content = this.querySelector('input[name="content"]').value;
+            
+            if (!content.trim()) return;
+            
+            fetch(`/send-message/${receiverId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `content=${encodeURIComponent(content)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const chatMessages = document.querySelector('.chat-messages');
+                    const messageEl = document.createElement('div');
+                    messageEl.className = 'chat-message sent';
+                    
+                    messageEl.innerHTML = `
+                        <div class="message-content">${data.message.content}</div>
+                        <div class="message-timestamp">${data.message.created_at}</div>
+                    `;
+                    
+                    chatMessages.appendChild(messageEl);
+                    
+                    // Clear input
+                    this.querySelector('input[name="content"]').value = '';
+                    
+                    // Scroll to bottom
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+    
+    // Message contacts click
+    const messageContacts = document.querySelectorAll('.message-contact');
+    messageContacts.forEach(contact => {
+        contact.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            window.location.href = `/messages?user_id=${userId}`;
+        });
+    });
+    
+    // Auto scroll to bottom of chat
+    const chatMessages = document.querySelector('.chat-messages');
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+});
+</script>
+{% endblock %}

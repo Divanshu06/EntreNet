@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Join EntreNet{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-form-container">
+        <div class="auth-logo">
+            <img src="{{ url_for('static', filename='img/linkedin-logo.png') }}" alt="LinkedIn" class="logo">
+        </div>
+        <h1>Make the most of your professional life</h1>
+        
+        <form method="POST" action="{{ url_for('signup') }}" class="auth-form">
+            <div class="form-group">
+                <label for="first_name">First name</label>
+                <input type="text" id="first_name" name="first_name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="last_name">Last name</label>
+                <input type="text" id="last_name" name="last_name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password (6 or more characters)</label>
+                <input type="password" id="password" name="password" minlength="6" required>
+            </div>
+            
+            <p class="terms-text">
+                By clicking Agree & Join, you agree to the EntreNet <a href="#">User Agreement</a>, <a href="#">Privacy Policy</a>, and <a href="#">Cookie Policy</a>.
+            </p>
+            
+            <button type="submit" class="btn btn-primary btn-full">Agree & Join</button>
+        </form>
+        
+        <div class="auth-divider">
+            <span>or</span>
+        </div>
+        
+        <button class="btn btn-outline btn-full btn-social">
+            <i class="fab fa-google"></i> Join with Google
+        </button>
+    </div>
+    
+    <div class="auth-footer">
+        <p>Already on EntreNetw? <a href="{{ url_for('login') }}">Sign in</a></p>
+    </div>
+</div>
+{% endblock %}
